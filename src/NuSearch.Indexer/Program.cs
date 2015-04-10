@@ -68,23 +68,25 @@ namespace NuSearch.Indexer
 
 		static void IndexDumps()
 		{
-			var packages = DumpReader.Dumps.Take(1).First().NugetPackages;
-
-			var result = Client.IndexMany(packages);
-
-			if (!result.IsValid)
+			var packages = DumpReader.GetPackages();
+			var partitions = packages.Partition(1000).ToList();
+			foreach (var partition in partitions)
 			{
-				Console.WriteLine(result.ConnectionStatus.OriginalException.Message);
-				Console.Read();
-				Environment.Exit(1);
-			}
+				var result = Client.IndexMany(partition);
 
-			if (result.Errors)
-			{
-				foreach (var item in result.ItemsWithErrors)
-					Console.WriteLine("Failed to index document {0}: {1}", item.Id, item.Error);
-			}
+				if (!result.IsValid)
+				{
+					Console.WriteLine(result.ConnectionStatus.OriginalException.Message);
+					Console.Read();
+					Environment.Exit(1);
+				}
 
+				if (result.Errors)
+				{
+					foreach (var item in result.ItemsWithErrors)
+						Console.WriteLine("Failed to index document {0}: {1}", item.Id, item.Error);
+				}
+			}
 			Console.WriteLine("Done.");
 		}
 	}
