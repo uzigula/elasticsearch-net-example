@@ -27,7 +27,8 @@ namespace NuSearch.Web.Search
 				var result = client.Search<Package>(s => s
 					.Size(25)
 					.Query(q => q
-						.QueryString(qs => qs
+						.MultiMatch(m => m
+							.OnFields(p => p.Id, p => p.Summary)
 							.Query(form.Query)
 						)
 					)
