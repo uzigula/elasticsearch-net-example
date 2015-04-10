@@ -24,7 +24,9 @@ namespace NuSearch.Web.Search
 				var model = new SearchViewModel();
 
 				var client = NuSearchConfiguration.GetClient();
-				var result = client.Search<Package>(s => s);
+				var result = client.Search<Package>(s => s
+					.Size(25)	
+				);
 
 				model.Packages = result.Documents;
 				model.Total = result.Total;
