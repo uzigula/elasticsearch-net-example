@@ -42,7 +42,7 @@ namespace NuSearch.Indexer
 		{
 			var packages = DumpReader.Dumps.Take(1).First().NugetPackages;
 
-			var result = Client.Bulk(b => b.IndexMany(packages));
+			var result = Client.IndexMany(packages);
 
 			if (!result.IsValid)
 			{
