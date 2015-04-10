@@ -72,9 +72,44 @@ namespace NuSearch.Indexer
 			Client.CreateIndex(IndexName, i => i
 				.NumberOfShards(2)
 				.NumberOfReplicas(0)
+				.Analysis(analysis => analysis
+					.Tokenizers(tokenizers => tokenizers
+						.Add("nuget-id-tokenizer", new PatternTokenizer { Pattern = @"\W+" })
+					)
+					.TokenFilters(tokenfilters => tokenfilters
+						.Add("nuget-id-words", new WordDelimiterTokenFilter
+						{
+							SplitOnCaseChange = true,
+							PreserveOriginal = true,
+							SplitOnNumerics = true,
+							GenerateNumberParts = false,
+							GenerateWordParts = true,
+						})
+					)
+					.Analyzers(analyzers => analyzers
+						.Add("nuget-id-analyzer", new CustomAnalyzer
+						{
+							Tokenizer = "nuget-id-tokenizer",
+							Filter = new[] { "nuget-id-words", "lowercase" }
+						})
+						.Add("nuget-id-keyword", new CustomAnalyzer
+						{
+							Tokenizer = "keyword",
+							Filter = new[] { "lowercase" }
+						})
+					)
+				)
 				.AddMapping<Package>(m => m
 					.MapFromAttributes()
 					.Properties(ps => ps
+						.String(s => s
+							.Name(p => p.Id)
+							.Analyzer("nuget-id-analyzer")
+							.Fields(f => f
+								.String(p => p.Name("keyword").Analyzer("nuget-id-keyword"))
+								.String(p => p.Name("raw").Index(FieldIndexOption.NotAnalyzed))
+							)
+						)
 						.NestedObject<PackageVersion>(n => n
 							.Name(p => p.Versions.First())
 							.MapFromAttributes()
