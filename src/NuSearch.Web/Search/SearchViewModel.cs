@@ -30,7 +30,7 @@ namespace NuSearch.Web.Search
 		/// <summary>
 		/// The current page of package results
 		/// </summary>
-		//public IEnumerable<Package> Packages { get; set; }
+		public IEnumerable<Package> Packages { get; set; }
 		
 		/// <summary>
 		/// Returns how long the elasticsearch query took in milliseconds
@@ -44,7 +44,7 @@ namespace NuSearch.Web.Search
 
 		public SearchViewModel()
 		{
-			//this.Packages = Enumerable.Empty<Package>();
+			this.Packages = Enumerable.Empty<Package>();
 			this.Form = new SearchForm();
 			this.Authors = new Dictionary<string, long>();
 		}
@@ -65,9 +65,9 @@ namespace NuSearch.Web.Search
 			return clone.ToQueryString();
 		}
 
-		//public string UrlFor(Package package)
-		//{
-		//	return string.Format("https://www.nuget.org/packages/{0}", package.Id);
-		//}
+		public string UrlFor(Package package)
+		{
+			return string.Format("https://www.nuget.org/packages/{0}", package.Id);
+		}
 	}
 }
