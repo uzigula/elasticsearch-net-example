@@ -29,10 +29,10 @@ namespace NuSearch.Domain
 		{
 			_connectionSettings = new ConnectionSettings(CreateUri(9200))
 				 .MapDefaultTypeNames(m => m
-					.Add(typeof(FeedPackage), "package")
+					.Add(typeof(Package), "package")
 				)
 				.MapDefaultTypeIndices(m => m
-					.Add(typeof(FeedPackage), "nusearch")
+					.Add(typeof(Package), "nusearch")
 				);
 		}
 

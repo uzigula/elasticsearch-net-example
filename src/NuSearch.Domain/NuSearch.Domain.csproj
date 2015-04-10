@@ -52,6 +52,18 @@
     <Compile Include="Data\NugetDumpReader.cs" />
     <Compile Include="Extensions\PartitionExtension.cs" />
     <Compile Include="Model\FeedPackage.cs" />
+    <Compile Include="Model\Package.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Model\PackageAuthor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Model\PackageDependency.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Model\PackageVersion.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="NuSearchConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

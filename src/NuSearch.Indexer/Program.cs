@@ -27,9 +27,37 @@ namespace NuSearch.Indexer
 			DumpReader = new NugetDumpReader(@"C:\nuget-data");
 
 			DeleteIndexIfExists();
+			CreateIndex();
 			IndexDumps();
 
 			Console.Read();
+		}
+
+		static void CreateIndex()
+		{
+			Client.CreateIndex("nusearch", i => i
+				.NumberOfShards(2)
+				.NumberOfReplicas(0)
+				.AddMapping<Package>(m => m
+					.MapFromAttributes()
+					.Properties(ps => ps
+						.NestedObject<PackageVersion>(n => n
+							.Name(p => p.Versions.First())
+							.MapFromAttributes()
+							.Properties(pps => pps
+								.NestedObject<PackageDependency>(nn => nn
+									.Name(pv => pv.Dependencies.First())
+									.MapFromAttributes()
+								)
+							)
+						)
+						.NestedObject<PackageAuthor>(n => n
+							.Name(p => p.Authors.First())
+							.MapFromAttributes()
+						)
+					)
+				)
+			);
 		}
 
 		static void DeleteIndexIfExists()
