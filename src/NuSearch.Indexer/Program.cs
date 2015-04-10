@@ -57,6 +57,12 @@ namespace NuSearch.Indexer
 				Environment.Exit(1);
 			}
 
+			if (result.Errors)
+			{
+				foreach (var item in result.ItemsWithErrors)
+					Console.WriteLine("Failed to index document {0}: {1}", item.Id, item.Error);
+			}
+
 			Console.WriteLine("Done.");
 		}
 	}
