@@ -29,6 +29,7 @@ namespace NuSearch.Web.Search
 					.Query(q => q
 						.MultiMatch(m => m
 							.OnFields(p => p.Id, p => p.Summary)
+							.Operator(Operator.And)
 							.Query(form.Query)
 						)
 					)
