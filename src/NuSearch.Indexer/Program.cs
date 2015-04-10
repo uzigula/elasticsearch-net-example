@@ -26,9 +26,16 @@ namespace NuSearch.Indexer
 			Client = NuSearchConfiguration.GetClient();
 			DumpReader = new NugetDumpReader(@"C:\nuget-data");
 
+			DeleteIndexIfExists();
 			IndexDumps();
 
 			Console.Read();
+		}
+
+		static void DeleteIndexIfExists()
+		{
+			if (Client.IndexExists("nusearch").Exists)
+				Client.DeleteIndex("nusearch");
 		}
 
 		static void IndexDumps()
