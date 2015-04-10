@@ -20,22 +20,49 @@ namespace NuSearch.Indexer
 	{
 		private static ElasticClient Client { get; set; }
 		private static NugetDumpReader DumpReader { get; set; }
+		private static string IndexName { get; set; }
 
 		static void Main(string[] args)
 		{
 			Client = NuSearchConfiguration.GetClient();
 			DumpReader = new NugetDumpReader(@"C:\nuget-data");
+			IndexName = NuSearchConfiguration.CreateIndexName();
 
-			DeleteIndexIfExists();
 			CreateIndex();
 			IndexDumps();
+			SwapAlias();
 
 			Console.Read();
 		}
 
+		private static void SwapAlias()
+		{
+			Client.Alias(alias => alias
+				.Remove(r => r
+					.Index("nusearch-*")
+					.Alias(NuSearchConfiguration.LiveIndexAlias)
+				)
+				.Add(a => a
+					.Index("nusearch-*")
+					.Alias(NuSearchConfiguration.OldIndexAlias)
+				)
+				.Add(a => a
+					.Index(IndexName)
+					.Alias(NuSearchConfiguration.LiveIndexAlias)
+				)
+			);
+
+			Client.Alias(alias => alias
+				.Remove(r => r
+					.Index(IndexName)
+					.Alias(NuSearchConfiguration.OldIndexAlias)
+				)
+			);
+		}
+
 		static void CreateIndex()
 		{
-			Client.CreateIndex("nusearch", i => i
+			Client.CreateIndex(IndexName, i => i
 				.NumberOfShards(2)
 				.NumberOfReplicas(0)
 				.AddMapping<Package>(m => m
@@ -60,19 +87,13 @@ namespace NuSearch.Indexer
 			);
 		}
 
-		static void DeleteIndexIfExists()
-		{
-			if (Client.IndexExists("nusearch").Exists)
-				Client.DeleteIndex("nusearch");
-		}
-
 		static void IndexDumps()
 		{
 			var packages = DumpReader.GetPackages();
 			var partitions = packages.Partition(1000).ToList();
 			foreach (var partition in partitions)
 			{
-				var result = Client.IndexMany(partition);
+				var result = Client.IndexMany(partition, IndexName);
 
 				if (!result.IsValid)
 				{
