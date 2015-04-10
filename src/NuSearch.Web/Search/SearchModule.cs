@@ -25,7 +25,12 @@ namespace NuSearch.Web.Search
 
 				var client = NuSearchConfiguration.GetClient();
 				var result = client.Search<Package>(s => s
-					.Size(25)	
+					.Size(25)
+					.Query(q => q
+						.QueryString(qs => qs
+							.Query(form.Query)
+						)
+					)
 				);
 
 				model.Packages = result.Documents;
