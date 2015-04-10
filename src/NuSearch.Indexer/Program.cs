@@ -58,6 +58,13 @@ namespace NuSearch.Indexer
 					.Alias(NuSearchConfiguration.OldIndexAlias)
 				)
 			);
+
+			var oldIndices = Client.GetIndicesPointingToAlias(NuSearchConfiguration.OldIndexAlias)
+				.OrderByDescending(name => name)
+				.Skip(2);
+
+			foreach (var oldIndex in oldIndices)
+				Client.DeleteIndex(oldIndex);
 		}
 
 		static void CreateIndex()
