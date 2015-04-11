@@ -26,29 +26,41 @@ namespace NuSearch.Web.Search
 				var client = NuSearchConfiguration.GetClient();
 				var result = client.Search<Package>(s => s
 					.Size(25)
-					.Query(q => 
-						q.Match(m => m
-							.OnField(p => p.Id.Suffix("keyword"))
-							.Boost(1000)
-							.Query(form.Query)
-						) || 
-						q.FunctionScore(fs => fs
-							.MaxBoost(100)
-							.Functions(ff => ff
-								.FieldValueFactor(fvf => fvf
-									.Field(p => p.DownloadCount)
-									.Factor(0.0001)
+					.Query(q => q
+						.Filtered(f => f
+							.Query(fq =>
+								fq.Match(m => m
+									.OnField(p => p.Id.Suffix("keyword"))
+									.Boost(1000)
+									.Query(form.Query)
+								) ||
+								fq.FunctionScore(fs => fs
+									.MaxBoost(100)
+									.Functions(ff => ff
+										.FieldValueFactor(fvf => fvf
+											.Field(p => p.DownloadCount)
+											.Factor(0.0001)
+										)
+									)
+									.Query(query => query
+										.MultiMatch(m => m
+											.OnFieldsWithBoost(fields => fields
+												.Add(p => p.Id.Suffix("keyword"), 1.5)
+												.Add(p => p.Id, 1.2)
+												.Add(p => p.Summary, 0.8)
+											)
+											.Operator(Operator.And)
+											.Query(form.Query)
+										)
+									)
 								)
 							)
-							.Query(query => query
-								.MultiMatch(m => m
-									.OnFieldsWithBoost(fields => fields
-										.Add(p => p.Id.Suffix("keyword"), 1.5)
-										.Add(p => p.Id, 1.2)
-										.Add(p => p.Summary, 0.8)
+							.Filter(ff => ff
+								.Nested(nf => nf
+									.Path("authors")
+									.Filter(nff => nff
+										.Term(t => t.Authors.First().Name.Suffix("raw"), form.Author)
 									)
-									.Operator(Operator.And)
-									.Query(form.Query)
 								)
 							)
 						)
