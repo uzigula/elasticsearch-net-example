@@ -58,7 +58,7 @@ namespace NuSearch.Web.Search
 							.Path("authors")
 							.Aggregations(aa => aa
 								.Terms("author-names", ts => ts
-									.Field(p => p.Authors.First().Name)
+									.Field(p => p.Authors.First().Name.Suffix("raw"))
 								)
 							)
 						)

@@ -113,7 +113,7 @@ namespace NuSearch.Indexer
 						.NestedObject<PackageVersion>(n => n
 							.Name(p => p.Versions.First())
 							.MapFromAttributes()
-							.Properties(pps => pps
+							.Properties(vps => vps
 								.NestedObject<PackageDependency>(nn => nn
 									.Name(pv => pv.Dependencies.First())
 									.MapFromAttributes()
@@ -123,6 +123,17 @@ namespace NuSearch.Indexer
 						.NestedObject<PackageAuthor>(n => n
 							.Name(p => p.Authors.First())
 							.MapFromAttributes()
+							.Properties(aps => aps
+								.String(s => s
+									.Name(a => a.Name)
+									.Fields(fs => fs
+										.String(ss => ss
+											.Name(aa => aa.Name.Suffix("raw"))
+											.Index(FieldIndexOption.NotAnalyzed)
+										)
+									)
+								)
+							)
 						)
 					)
 				)
