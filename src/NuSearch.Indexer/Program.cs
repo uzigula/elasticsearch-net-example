@@ -110,6 +110,10 @@ namespace NuSearch.Indexer
 								.String(p => p.Name("raw").Index(FieldIndexOption.NotAnalyzed))
 							)
 						)
+						.Completion(c => c
+							.Name(p => p.Suggest)
+							.Payloads()
+						)
 						.NestedObject<PackageVersion>(n => n
 							.Name(p => p.Versions.First())
 							.MapFromAttributes()

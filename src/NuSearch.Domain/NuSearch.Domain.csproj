@@ -51,6 +51,7 @@
     <Compile Include="Data\NugetDump.cs" />
     <Compile Include="Data\NugetDumpReader.cs" />
     <Compile Include="Extensions\PartitionExtension.cs" />
+    <Compile Include="Model\SuggestField.cs" />
     <Compile Include="Model\FeedPackage.cs" />
     <Compile Include="Model\Package.cs">
       <SubType>Code</SubType>
