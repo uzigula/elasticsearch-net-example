@@ -110,6 +110,7 @@
     <Compile Include="Search\SearchForm.cs" />
     <Compile Include="Search\SearchModule.cs" />
     <Compile Include="Search\SearchViewModel.cs" />
+    <Compile Include="Search\SuggestModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Static\bootstrap.min.css" />

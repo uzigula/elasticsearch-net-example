@@ -5,7 +5,7 @@
 
     $("#query").focus().select();
 
-    //setupTypeAhead();
+    setupTypeAhead();
 
 });
 
