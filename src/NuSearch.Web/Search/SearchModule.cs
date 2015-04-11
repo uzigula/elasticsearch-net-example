@@ -27,6 +27,21 @@ namespace NuSearch.Web.Search
 				var result = client.Search<Package>(s => s
 					.Skip(form.Page * form.PageSize)
 					.Take(form.PageSize)
+					.Sort(sort =>
+					{
+						sort.Descending();
+						if (form.Sort == SearchSort.Downloads)
+							return sort
+								.NestedPath(p => p.Versions)
+								.OnField(p => p.Versions.First().DownloadCount)
+								.NestedSum();
+						if (form.Sort == SearchSort.Recent)
+							return sort
+								.NestedPath(p => p.Versions)
+								.OnField(p => p.Versions.First().LastUpdated)
+								.NestedMax();
+						return sort.OnField("_score");
+					})
 					.Query(q => q
 						.Filtered(f => f
 							.Query(fq =>
