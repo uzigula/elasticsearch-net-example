@@ -28,7 +28,11 @@ namespace NuSearch.Web.Search
 					.Size(25)
 					.Query(q => q
 						.MultiMatch(m => m
-							.OnFields(p => p.Id, p => p.Summary)
+							.OnFieldsWithBoost(fields => fields
+								.Add(p=>p.Id.Suffix("keyword"), 1.5)
+								.Add(p=>p.Id, 1.5)
+								.Add(p=>p.Summary, 0.8)
+							)
 							.Operator(Operator.And)
 							.Query(form.Query)
 						)
