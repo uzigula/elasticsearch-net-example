@@ -32,7 +32,7 @@
 				</div>
 			</div>
 		</div>
-	@*	@Html.Partial("Partials/Pager", Model)*@
+		@Html.Partial("Partials/Pager", Model)
 		@if (Model.Total > 0)
 		{
 			@Html.Partial("Partials/Results", Model)
@@ -41,7 +41,7 @@
 		{
 			@Html.Partial("Partials/NoResults", Model)
 		}
-	@*	@Html.Partial("Partials/Pager", Model)*@
+		@Html.Partial("Partials/Pager", Model)
 	</form>
 </body>
 </html>

@@ -25,7 +25,8 @@ namespace NuSearch.Web.Search
 
 				var client = NuSearchConfiguration.GetClient();
 				var result = client.Search<Package>(s => s
-					.Size(25)
+					.Skip(form.Page * form.PageSize)
+					.Take(form.PageSize)
 					.Query(q => q
 						.Filtered(f => f
 							.Query(fq =>
@@ -85,6 +86,7 @@ namespace NuSearch.Web.Search
 				model.Authors = authors;
 				model.Packages = result.Documents;
 				model.Total = result.Total;
+				model.TotalPages = (int)Math.Ceiling(result.Total / (double)form.PageSize);
 				model.Form = form;
 
 				return View[model];
