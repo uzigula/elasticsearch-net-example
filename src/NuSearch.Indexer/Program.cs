@@ -70,70 +70,71 @@ namespace NuSearch.Indexer
 		static void CreateIndex()
 		{
 			Client.CreateIndex(IndexName, i => i
-				.NumberOfShards(2)
-				.NumberOfReplicas(0)
-				.Analysis(analysis => analysis
-					.Tokenizers(tokenizers => tokenizers
-						.Add("nuget-id-tokenizer", new PatternTokenizer { Pattern = @"\W+" })
-					)
-					.TokenFilters(tokenfilters => tokenfilters
-						.Add("nuget-id-words", new WordDelimiterTokenFilter
-						{
-							SplitOnCaseChange = true,
-							PreserveOriginal = true,
-							SplitOnNumerics = true,
-							GenerateNumberParts = false,
-							GenerateWordParts = true,
-						})
-					)
-					.Analyzers(analyzers => analyzers
-						.Add("nuget-id-analyzer", new CustomAnalyzer
-						{
-							Tokenizer = "nuget-id-tokenizer",
-							Filter = new[] { "nuget-id-words", "lowercase" }
-						})
-						.Add("nuget-id-keyword", new CustomAnalyzer
-						{
-							Tokenizer = "keyword",
-							Filter = new[] { "lowercase" }
-						})
+				.Settings(s => s
+					.NumberOfShards(2)
+					.NumberOfReplicas(0)
+					.Analysis(analysis => analysis
+						.Tokenizers(tokenizers => tokenizers
+							.Pattern("nuget-id-tokenizer", p => p.Pattern(@"\W+"))
+						)
+						.TokenFilters(tokenfilters => tokenfilters
+							.WordDelimiter("nuget-id-words", wd => wd
+								.SplitOnCaseChange()
+								.PreserveOriginal()
+								.SplitOnNumerics()
+								.GenerateNumberParts(false)
+								.GenerateWordParts()
+							)
+						)
+						.Analyzers(analyzers => analyzers
+							.Custom("nuget-id-analyzer", c => c
+								.Tokenizer("nuget-id-tokenizer")
+								.Filters("nuget-id-words", "lowercase")
+							)
+							.Custom("nuget-id-keyword", c => c
+								.Tokenizer("keyword")
+								.Filters("lowercase")
+							)
+						)
 					)
 				)
-				.AddMapping<Package>(m => m
-					.MapFromAttributes()
-					.Properties(ps => ps
-						.String(s => s
-							.Name(p => p.Id)
-							.Analyzer("nuget-id-analyzer")
-							.Fields(f => f
-								.String(p => p.Name("keyword").Analyzer("nuget-id-keyword"))
-								.String(p => p.Name("raw").Index(FieldIndexOption.NotAnalyzed))
+				.Mappings(ms => ms
+					.Map<Package>(m => m
+						.AutoMap()
+						.Properties(ps => ps
+							.String(s => s
+								.Name(p => p.Id)
+								.Analyzer("nuget-id-analyzer")
+									.Fields(f => f
+										.String(p => p.Name("keyword").Analyzer("nuget-id-keyword"))
+										.String(p => p.Name("raw").Index(FieldIndexOption.NotAnalyzed))
+									)
 							)
-						)
-						.Completion(c => c
-							.Name(p => p.Suggest)
-							.Payloads()
-						)
-						.NestedObject<PackageVersion>(n => n
-							.Name(p => p.Versions.First())
-							.MapFromAttributes()
-							.Properties(vps => vps
-								.NestedObject<PackageDependency>(nn => nn
-									.Name(pv => pv.Dependencies.First())
-									.MapFromAttributes()
+							.Completion(c => c
+								.Name(p => p.Suggest)
+								.Payloads()
+							)
+							.Nested<PackageVersion>(n => n
+								.Name(p => p.Versions.First())
+								.AutoMap()
+								.Properties(vps => vps
+									.Nested<PackageDependency>(nn => nn
+										.Name(pv => pv.Dependencies.First())
+										.AutoMap()
+									)
 								)
 							)
-						)
-						.NestedObject<PackageAuthor>(n => n
-							.Name(p => p.Authors.First())
-							.MapFromAttributes()
-							.Properties(aps => aps
-								.String(s => s
-									.Name(a => a.Name)
-									.Fields(fs => fs
-										.String(ss => ss
-											.Name(aa => aa.Name.Suffix("raw"))
-											.Index(FieldIndexOption.NotAnalyzed)
+							.Nested<PackageAuthor>(n => n
+								.Name(p => p.Authors.First())
+								.AutoMap()
+								.Properties(aps => aps
+									.String(s => s
+										.Name(a => a.Name)
+										.Fields(fs => fs
+											.String(ss => ss
+												.Name(aa => aa.Name.Suffix("raw"))
+												.Index(FieldIndexOption.NotAnalyzed)
+											)
 										)
 									)
 								)
@@ -154,7 +155,7 @@ namespace NuSearch.Indexer
 
 				if (!result.IsValid)
 				{
-					Console.WriteLine(result.ConnectionStatus.OriginalException.Message);
+					Console.WriteLine(result.ApiCall.OriginalException.Message);
 					Console.Read();
 					Environment.Exit(1);
 				}

@@ -19,15 +19,15 @@ namespace NuSearch.Web
 				Port = 8080
 			};
 
-			var loggerConfig = new LoggerConfiguration()
-				.MinimumLevel.Debug()
-				.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(NuSearchConfiguration.CreateUri(9200))
-				{
-					AutoRegisterTemplate = true,
-					Period = TimeSpan.FromSeconds(2)
-				});
+			//var loggerConfig = new LoggerConfiguration()
+			//	.MinimumLevel.Debug()
+			//	.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(NuSearchConfiguration.CreateUri(9200))
+			//	{
+			//		AutoRegisterTemplate = true,
+			//		Period = TimeSpan.FromSeconds(2)
+			//	});
 
-			Serilog.Log.Logger = loggerConfig.CreateLogger();
+			//Serilog.Log.Logger = loggerConfig.CreateLogger();
 
 			using (WebApp.Start<Bootstrap>(options))
 			{

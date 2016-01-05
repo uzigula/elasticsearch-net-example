@@ -29,28 +29,31 @@ namespace NuSearch.Web.Search
 					.Take(form.PageSize)
 					.Sort(sort =>
 					{
-						sort.Descending();
 						if (form.Sort == SearchSort.Downloads)
-							return sort
+							return sort.Field(f => f
 								.NestedPath(p => p.Versions)
-								.OnField(p => p.Versions.First().DownloadCount)
-								.NestedSum();
+								.Field(p => p.Versions.First().DownloadCount)
+								.Mode(SortMode.Sum)
+								.Descending()
+							);
 						if (form.Sort == SearchSort.Recent)
-							return sort
+							return sort.Field(f => f
 								.NestedPath(p => p.Versions)
-								.OnField(p => p.Versions.First().LastUpdated)
-								.NestedMax();
-						return sort.OnField("_score");
+								.Field(p => p.Versions.First().LastUpdated)
+								.Mode(SortMode.Max)
+								.Descending()
+							);
+						return sort.Descending(SortSpecialField.Score);
 					})
 					.Query(q => q
-						.Filtered(f => f
-							.Query(fq =>
-								fq.Match(m => m
-									.OnField(p => p.Id.Suffix("keyword"))
+						.Bool(b => b
+							.Must(must => must
+								.Match(m => m
+									.Field(p => p.Id.Suffix("keyword"))
 									.Boost(1000)
 									.Query(form.Query)
-								) ||
-								fq.FunctionScore(fs => fs
+								) || must
+								.FunctionScore(fs => fs
 									.MaxBoost(100)
 									.Functions(ff => ff
 										.FieldValueFactor(fvf => fvf
@@ -60,10 +63,10 @@ namespace NuSearch.Web.Search
 									)
 									.Query(query => query
 										.MultiMatch(m => m
-											.OnFieldsWithBoost(fields => fields
-												.Add(p => p.Id.Suffix("keyword"), 1.5)
-												.Add(p => p.Id, 1.2)
-												.Add(p => p.Summary, 0.8)
+											.Fields(fields => fields
+												.Field(p => p.Id.Suffix("keyword"), 1.5)
+												.Field(p => p.Id, 1.2)
+												.Field(p => p.Summary, 0.8)
 											)
 											.Operator(Operator.And)
 											.Query(form.Query)
@@ -71,10 +74,10 @@ namespace NuSearch.Web.Search
 									)
 								)
 							)
-							.Filter(ff => ff
+							.Filter(f => f
 								.Nested(nf => nf
 									.Path("authors")
-									.Filter(nff => nff
+									.Query(nq => nq
 										.Term(t => t.Authors.First().Name.Suffix("raw"), form.Author)
 									)
 								)

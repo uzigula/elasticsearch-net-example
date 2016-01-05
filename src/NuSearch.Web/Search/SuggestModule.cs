@@ -27,14 +27,14 @@ namespace NuSearch.Web.Search
 					.Index<Package>()
 					.Completion("package-suggestions", c => c
 						.Text(form.Query)
-						.OnField(p => p.Suggest)
+						.Field(p => p.Suggest)
 					)
 				);
 
 				var suggestions = result.Suggestions["package-suggestions"]
 					.FirstOrDefault()
 					.Options
-					.Select(suggest => suggest.Payload);
+					.Select(suggest => suggest.Payload<object>());
 
 				return Response.AsJson(suggestions);
 			};
