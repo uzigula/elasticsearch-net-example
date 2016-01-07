@@ -10252,7 +10252,7 @@
             Provides the connection settings for NEST's <see cref="T:Nest.ElasticClient"/>
             </summary>
         </member>
-        <member name="M:Nest.ConnectionSettings`1.DefaultSerializer">
+        <member name="M:Nest.ConnectionSettings`1.DefaultSerializer(`0)">
             <summary>
             The default serializer for requests and responses
             </summary>
@@ -10261,16 +10261,6 @@
         <member name="M:Nest.ConnectionSettings`1.PluralizeTypeNames">
             <summary>
             This calls SetDefaultTypenameInferrer with an implementation that will pluralize type names. This used to be the default prior to Nest 0.90
-            </summary>
-        </member>
-        <member name="M:Nest.ConnectionSettings`1.JsonSerializerSettingsModifier(System.Action{Newtonsoft.Json.JsonSerializerSettings})">
-            <summary>
-            Allows you to update internal the json.net serializer settings to your liking
-            </summary>
-        </member>
-        <member name="M:Nest.ConnectionSettings`1.AddContractJsonConverters(System.Func{System.Type,Newtonsoft.Json.JsonConverter}[])">
-            <summary>
-            Add a custom JsonConverter to the build in json serialization by passing in a predicate for a type.
             </summary>
         </member>
         <member name="M:Nest.ConnectionSettings`1.DefaultIndex(System.String)">
@@ -13299,19 +13289,19 @@
             To avoid repetition of the suggest text, it is possible to define a global text.
             </summary>
         </member>
-        <member name="M:Nest.SuggestDescriptor`1.Term(System.String,System.Func{Nest.TermSuggesterDescriptor{`0},Nest.TermSuggesterDescriptor{`0}})">
+        <member name="M:Nest.SuggestDescriptor`1.Term(System.String,System.Func{Nest.TermSuggesterDescriptor{`0},Nest.ITermSuggester})">
             <summary>
             The term suggester suggests terms based on edit distance. The provided suggest text is analyzed before terms are suggested. 
             The suggested terms are provided per analyzed suggest text token. The term suggester doesn’t take the query into account that is part of request.
             </summary>
         </member>
-        <member name="M:Nest.SuggestDescriptor`1.Phrase(System.String,System.Func{Nest.PhraseSuggesterDescriptor{`0},Nest.PhraseSuggesterDescriptor{`0}})">
+        <member name="M:Nest.SuggestDescriptor`1.Phrase(System.String,System.Func{Nest.PhraseSuggesterDescriptor{`0},Nest.IPhraseSuggester})">
             <summary>
             The phrase suggester adds additional logic on top of the term suggester to select entire corrected phrases 
             instead of individual tokens weighted based on ngram-langugage models. 
             </summary>
         </member>
-        <member name="M:Nest.SuggestDescriptor`1.Completion(System.String,System.Func{Nest.CompletionSuggesterDescriptor{`0},Nest.CompletionSuggesterDescriptor{`0}})">
+        <member name="M:Nest.SuggestDescriptor`1.Completion(System.String,System.Func{Nest.CompletionSuggesterDescriptor{`0},Nest.ICompletionSuggester})">
             <summary>
             The completion suggester is a so-called prefix suggester. 
             It does not do spell correction like the term or phrase suggesters but allows basic auto-complete functionality.

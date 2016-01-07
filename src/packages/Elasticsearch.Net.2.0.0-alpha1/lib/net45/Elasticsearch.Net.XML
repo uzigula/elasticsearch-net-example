@@ -903,7 +903,7 @@
             Basic access authentication credentials to specify with all requests.
             </summary>
         </member>
-        <member name="M:Elasticsearch.Net.ConnectionConfiguration`1.HttpPipeliningEnabled(System.Boolean)">
+        <member name="M:Elasticsearch.Net.ConnectionConfiguration`1.EnableHttpPipelining(System.Boolean)">
             <summary>
             Allows for requests to be pipelined. http://en.wikipedia.org/wiki/HTTP_pipelining
             <para>Note: HTTP pipelining must also be enabled in Elasticsearch for this to work properly.</para>
