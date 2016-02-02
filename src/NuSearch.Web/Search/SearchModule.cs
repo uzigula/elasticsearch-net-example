@@ -98,8 +98,8 @@ namespace NuSearch.Web.Search
 
 				var authors = result.Aggs.Nested("authors")
 					.Terms("author-names")
-					.Items
-					.ToDictionary(k => k.Key, v => v.DocCount);
+					.Buckets
+					.ToDictionary(k => k.Key, v => v.DocCount.GetValueOrDefault(0));
 
 				model.Authors = authors;
 				model.Packages = result.Documents;
