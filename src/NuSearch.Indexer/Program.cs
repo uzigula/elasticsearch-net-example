@@ -16,38 +16,70 @@ using ShellProgressBar;
 
 namespace NuSearch.Indexer
 {
-	class Program
-	{
-		private static ElasticClient Client { get; set; }
-		private static NugetDumpReader DumpReader { get; set; }
+    class Program
+    {
+        private static ElasticClient Client { get; set; }
+        private static NugetDumpReader DumpReader { get; set; }
 
-		static void Main(string[] args)
-		{
-			Client = NuSearchConfiguration.GetClient();
-			DumpReader = new NugetDumpReader(@"C:\nuget-data");
+        static void Main(string[] args)
+        {
+            Client = NuSearchConfiguration.GetClient();
+            DumpReader = new NugetDumpReader(@"C:\nuget-data");
+            DeleteIndexIfExists();
+            IndexDumps();
 
-			IndexDumps();
+            Console.Read();
+        }
 
-			Console.Read();
-		}
+        static void IndexDumps()
+        {
+            var packages = DumpReader.Dumps.Take(1).First().NugetPackages;
 
-		static void IndexDumps()
-		{
-			var packages = DumpReader.Dumps.Take(1).First().NugetPackages;
-			
-			foreach (var package in packages)
-			{
-				var result = Client.Index(package);
+            var result = Client.IndexMany(packages);
 
-				if (!result.IsValid)
-				{
-					Console.WriteLine(result.ConnectionStatus.OriginalException.Message);
-					Console.Read();
-					Environment.Exit(1);
-				}
-			}
+            if (!result.IsValid)
+            {
+                foreach (var item in result.ItemsWithErrors)
+                    Console.WriteLine($"Failed to Index document {item.Id} : {item.Error}");
+                Console.WriteLine(result.ConnectionStatus.OriginalException.Message);
+                Console.Read();
+                Environment.Exit(1);
+            }
 
-			Console.WriteLine("Done.");
-		}
-	}
+            Console.WriteLine("Done.");
+        }
+
+        static void DeleteIndexIfExists()
+        {
+            if (Client.IndexExists(NuSearchConfiguration.LiveIndexAlias).Exists)
+                Client.DeleteIndex(NuSearchConfiguration.LiveIndexAlias);
+        }
+
+        static void CreateIndex()
+        {
+            Client.CreateIndex(NuSearchConfiguration.LiveIndexAlias,idx=> idx
+                        .NumberOfShards(2)
+                        .NumberOfReplicas(0)
+                        .AddMapping<Package>(m=> m
+                            .MapFromAttributes()
+                            .Properties( prop => prop
+                                .NestedObject<PackageVersion>(n=> n
+                                    .Name(p=>p.Versions.First())
+                                    .MapFromAttributes()
+                                    .Properties(nprop => nprop
+                                        .NestedObject<PackageDependency>(nd => nd
+                                            .Name(pnd=>pnd.Dependencies.First())
+                                            .MapFromAttributes()
+                                        )
+                                    )
+                                )
+                                .NestedObject<PackageAuthor>(n => n
+                                    .Name(p=>p.Authors.First())
+                                    .MapFromAttributes()
+                                )
+                            )
+                        )
+                );
+        }
+    }
 }

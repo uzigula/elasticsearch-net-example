@@ -18,16 +18,16 @@ namespace NuSearch.Domain
 
 		public static Uri CreateUri(int port)
 		{
-			var host = "localhost";
-			if (Process.GetProcessesByName("fiddler").Any())
-				host = "ipv4.fiddler";
-
+			var host = "ebbsdvepiq11";
 			return new Uri("http://" + host + ":" + port);
 		}
 
 		static NuSearchConfiguration()
 		{
-			_connectionSettings = new ConnectionSettings(CreateUri(9200));
+			_connectionSettings = new ConnectionSettings(CreateUri(9200))
+                                        .SetDefaultIndex(LiveIndexAlias)
+                                        .MapDefaultTypeNames(m=> m.Add(typeof(Package),"package"))
+                                        .MapDefaultTypeIndices(m=>m.Add(typeof(Package), LiveIndexAlias));
 		}
 
 		public static ElasticClient GetClient()
@@ -39,6 +39,8 @@ namespace NuSearch.Domain
 		{
 			return string.Format("{0}-{1:dd-MM-yyyy-HH-mm-ss}", LiveIndexAlias, DateTime.UtcNow);
 		}
+
+        
 
 	}
 }
