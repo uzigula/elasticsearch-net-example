@@ -26,6 +26,7 @@ namespace NuSearch.Indexer
             Client = NuSearchConfiguration.GetClient();
             DumpReader = new NugetDumpReader(@"C:\nuget-data");
             DeleteIndexIfExists();
+            CreateIndex();
             IndexDumps();
 
             Console.Read();
@@ -33,19 +34,21 @@ namespace NuSearch.Indexer
 
         static void IndexDumps()
         {
-            var packages = DumpReader.Dumps.Take(1).First().NugetPackages;
-
-            var result = Client.IndexMany(packages);
-
-            if (!result.IsValid)
+            var packages = DumpReader.GetPackages(); //Dumps.Take(1).First().NugetPackages;
+            var partitions = packages.Partition(1000).Take(1);
+            foreach (var partition in partitions)
             {
-                foreach (var item in result.ItemsWithErrors)
-                    Console.WriteLine($"Failed to Index document {item.Id} : {item.Error}");
-                Console.WriteLine(result.ConnectionStatus.OriginalException.Message);
-                Console.Read();
-                Environment.Exit(1);
-            }
+                var result = Client.IndexMany(partition);
 
+                if (!result.IsValid)
+                {
+                    foreach (var item in result.ItemsWithErrors)
+                        Console.WriteLine($"Failed to Index document {item.Id} : {item.Error}");
+                    Console.WriteLine(result.ConnectionStatus.OriginalException.Message);
+                    Console.Read();
+                    Environment.Exit(1);
+                }
+            }
             Console.WriteLine("Done.");
         }
 
